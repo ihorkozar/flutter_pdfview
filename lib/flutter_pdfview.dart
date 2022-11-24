@@ -323,6 +323,9 @@ class PDFViewController {
   Future<void> _updateWidget(PDFView widget) async {
     _widget = widget;
     await _updateSettings(_PDFViewSettings.fromWidget(widget));
+    if(widget.filePath != null){
+      await _updateFile(widget.filePath!);
+    }
   }
 
   Future<void> _updateSettings(_PDFViewSettings setting) async {
@@ -332,5 +335,9 @@ class PDFViewController {
     }
     _settings = setting;
     return _channel.invokeMethod('updateSettings', updateMap);
+  }
+
+  Future<void> _updateFile(String filePath) async {
+    return _channel.invokeMethod('updatePdf', filePath);
   }
 }

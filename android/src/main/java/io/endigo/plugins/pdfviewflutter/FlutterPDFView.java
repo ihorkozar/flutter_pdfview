@@ -116,6 +116,9 @@ public class FlutterPDFView implements PlatformView, MethodCallHandler {
             case "updateSettings":
                 updateSettings(methodCall, result);
                 break;
+            case "updatePdf":
+                updatePdf(methodCall, result);
+                break;
             default:
                 result.notImplemented();
                 break;
@@ -142,6 +145,16 @@ public class FlutterPDFView implements PlatformView, MethodCallHandler {
     @SuppressWarnings("unchecked")
     private void updateSettings(MethodCall methodCall, Result result) {
         applySettings((Map<String, Object>) methodCall.arguments);
+        result.success(null);
+
+    }
+
+    @SuppressWarnings("unchecked")
+    private void updatePdf(MethodCall methodCall, Result result) {
+        if (call.argument("filePath") != null) {
+            String filePath = (String) call.argument("filePath");
+            config = pdfView.fromUri(getURI(filePath));
+        }
         result.success(null);
     }
 
