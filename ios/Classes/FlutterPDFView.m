@@ -96,15 +96,15 @@
                     controler:(nonnull FLTPDFViewController *)controler {
     if ([super init]) {
         _controler = controler;
-        
+
         _pdfView = [[PDFView alloc] initWithFrame: frame];
         _pdfView.delegate = self;
-                
+
         _autoSpacing = [args[@"autoSpacing"] boolValue];
         BOOL pageFling = [args[@"pageFling"] boolValue];
         BOOL enableSwipe = [args[@"enableSwipe"] boolValue];
         _preventLinkNavigation = [args[@"preventLinkNavigation"] boolValue];
-        
+
         NSInteger defaultPage = [args[@"defaultPage"] integerValue];
 
         NSString* filePath = args[@"filePath"];
@@ -135,14 +135,14 @@
             }
 
             _pdfView.autoScales = _autoSpacing;
-  
+
             [_pdfView usePageViewController:pageFling withViewOptions:nil];
             _pdfView.displayMode = enableSwipe ? kPDFDisplaySinglePageContinuous : kPDFDisplaySinglePage;
             _pdfView.document = document;
 
             _pdfView.maxScaleFactor = 4.0;
             _pdfView.minScaleFactor = _pdfView.scaleFactorForSizeToFit;
-               
+
             NSString* password = args[@"password"];
             if ([password isKindOfClass:[NSString class]] && [_pdfView.document isEncrypted]) {
                 [_pdfView.document unlockWithPassword:password];
@@ -167,7 +167,7 @@
                 [weakSelf handleRenderCompleted:[NSNumber numberWithUnsignedLong: [document pageCount]]];
             });
         }
-        
+
         if (@available(iOS 11.0, *)) {
             UIScrollView *_scrollView;
 
@@ -176,16 +176,16 @@
                     _scrollView = subview;
                 }
             }
-            
+
             _scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
             if (@available(iOS 13.0, *)) {
                 _scrollView.automaticallyAdjustsScrollIndicatorInsets = NO;
             }
         }
-        
+
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handlePageChanged:) name:PDFViewPageChangedNotification object:_pdfView];
         [self addSubview:_pdfView];
-        
+
     }
     return self;
 }
@@ -218,7 +218,7 @@
 - (void)setPage:(FlutterMethodCall*)call result:(FlutterResult)result {
     NSDictionary<NSString*, NSNumber*>* arguments = [call arguments];
     NSNumber* page = arguments[@"page"];
-    
+
     [_pdfView goToPage: [_pdfView.document pageAtIndex: page.unsignedLongValue ]];
     result([NSNumber numberWithBool: YES]);
 }
@@ -228,7 +228,19 @@
 }
 
 - (void)updatePdf:(FlutterMethodCall*)call result:(FlutterResult)result {
-    result(nil);
+    NSDictionary<NSString*, NSString*>* arguments = [call arguments];
+    NSString* filePath = arguments[@"filePath"];
+    PDFDocument* document;
+    if ([filePath isKindOfClass:[NSString class]]) {
+         NSURL* sourcePDFUrl = [NSURL fileURLWithPath:filePath];
+         document = [[PDFDocument alloc] initWithURL: sourcePDFUrl];
+    }
+    if (document == nil) {
+         [_controler invokeChannelMethod:@"onError" arguments:@{@"error" : @"cannot create document: File not in PDF format or corrupted."}];
+    } else {
+         _pdfView.document = document;
+    }
+   result(nil);
 }
 
 -(void)handlePageChanged:(NSNotification*)notification {

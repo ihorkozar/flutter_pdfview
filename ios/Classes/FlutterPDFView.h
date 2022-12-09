@@ -30,6 +30,7 @@ API_AVAILABLE(ios(11.0))
 - (void)getCurrentPage:(FlutterMethodCall*)call result:(FlutterResult)result;
 - (void)setPage:(FlutterMethodCall*)call result:(FlutterResult)result;
 - (void)onUpdateSettings:(FlutterMethodCall*)call result:(FlutterResult)result;
+- (void)updatePdf:(FlutterMethodCall*)call result:(FlutterResult)result;
 @end
 
 API_AVAILABLE(ios(11.0))
