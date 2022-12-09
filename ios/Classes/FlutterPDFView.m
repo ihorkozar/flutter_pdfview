@@ -64,6 +64,8 @@
         [_pdfView setPage:call result:result];
     } else if ([[call method] isEqualToString:@"updateSettings"]) {
         [_pdfView onUpdateSettings:call result:result];
+    } else if ([[call method] isEqualToString:@"updatePdf"]) {
+        [_pdfView updatePdf:call result:result];
     } else {
         result(FlutterMethodNotImplemented);
     }
@@ -222,6 +224,10 @@
 }
 
 - (void)onUpdateSettings:(FlutterMethodCall*)call result:(FlutterResult)result {
+    result(nil);
+}
+
+- (void)updatePdf:(FlutterMethodCall*)call result:(FlutterResult)result {
     result(nil);
 }
 
