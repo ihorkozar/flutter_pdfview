@@ -27,6 +27,7 @@ public class FlutterPDFView implements PlatformView, MethodCallHandler {
     private final PDFView pdfView;
     private final MethodChannel methodChannel;
     private final LinkHandler linkHandler;
+    Configurator config = null;
 
     @SuppressWarnings("unchecked")
     FlutterPDFView(Context context, BinaryMessenger messenger, int id, Map<String, Object> params) {
@@ -38,15 +39,14 @@ public class FlutterPDFView implements PlatformView, MethodCallHandler {
 
         linkHandler = new PDFLinkHandler(context, pdfView, methodChannel, preventLinkNavigation);
 
-        Configurator config = null;
         if (params.get("filePath") != null) {
-          String filePath = (String) params.get("filePath");
-          config = pdfView.fromUri(getURI(filePath));
+            String filePath = (String) params.get("filePath");
+            config = pdfView.fromUri(getURI(filePath));
+        } else if (params.get("pdfData") != null) {
+            byte[] data = (byte[]) params.get("pdfData");
+            config = pdfView.fromBytes(data);
         }
-        else if (params.get("pdfData") != null) {
-          byte[] data = (byte[]) params.get("pdfData");
-          config = pdfView.fromBytes(data);
-        }
+
 
         if (config != null) {
             config
@@ -71,33 +71,33 @@ public class FlutterPDFView implements PlatformView, MethodCallHandler {
                             methodChannel.invokeMethod("onPageChanged", args);
                         }
                     }).onError(new OnErrorListener() {
-                @Override
-                public void onError(Throwable t) {
-                    Map<String, Object> args = new HashMap<>();
-                    args.put("error", t.toString());
-                    methodChannel.invokeMethod("onError", args);
-                }
-            }).onPageError(new OnPageErrorListener() {
-                @Override
-                public void onPageError(int page, Throwable t) {
-                    Map<String, Object> args = new HashMap<>();
-                    args.put("page", page);
-                    args.put("error", t.toString());
-                    methodChannel.invokeMethod("onPageError", args);
-                }
-            }).onRender(new OnRenderListener() {
-                @Override
-                public void onInitiallyRendered(int pages) {
-                    Map<String, Object> args = new HashMap<>();
-                    args.put("pages", pages);
-                    methodChannel.invokeMethod("onRender", args);
-                }
-            }).enableDoubletap(true).defaultPage(getInt(params, "defaultPage")).load();
+                        @Override
+                        public void onError(Throwable t) {
+                            Map<String, Object> args = new HashMap<>();
+                            args.put("error", t.toString());
+                            methodChannel.invokeMethod("onError", args);
+                        }
+                    }).onPageError(new OnPageErrorListener() {
+                        @Override
+                        public void onPageError(int page, Throwable t) {
+                            Map<String, Object> args = new HashMap<>();
+                            args.put("page", page);
+                            args.put("error", t.toString());
+                            methodChannel.invokeMethod("onPageError", args);
+                        }
+                    }).onRender(new OnRenderListener() {
+                        @Override
+                        public void onInitiallyRendered(int pages) {
+                            Map<String, Object> args = new HashMap<>();
+                            args.put("pages", pages);
+                            methodChannel.invokeMethod("onRender", args);
+                        }
+                    }).enableDoubletap(true).defaultPage(getInt(params, "defaultPage")).load();
         }
     }
 
     @Override
-    public View getView() {
+    public PDFView getView() {
         return pdfView;
     }
 
@@ -146,15 +146,16 @@ public class FlutterPDFView implements PlatformView, MethodCallHandler {
     private void updateSettings(MethodCall methodCall, Result result) {
         applySettings((Map<String, Object>) methodCall.arguments);
         result.success(null);
-
     }
 
     @SuppressWarnings("unchecked")
-    private void updatePdf(MethodCall methodCall, Result result) {
-        if (call.argument("filePath") != null) {
-            String filePath = (String) call.argument("filePath");
-            config = pdfView.fromUri(getURI(filePath));
-        }
+    private void updatePdf(MethodCall call, Result result) {
+        System.out.print("updatePdf");
+        Map<String, Object> arguments = (Map<String, Object>) call.arguments;
+        String filePath = getString(arguments,"filePath");
+        System.out.print("Java file path" + filePath);
+        config = pdfView.fromUri(getURI(filePath));
+        config.load();
         result.success(null);
     }
 
