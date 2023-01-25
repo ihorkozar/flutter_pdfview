@@ -338,6 +338,8 @@ class PDFViewController {
   }
 
   Future<void> _updateFile(String filePath) async {
-    return _channel.invokeMethod('updatePdf', filePath);
+    final Map<String, dynamic> updateMap = <String, dynamic>{};
+    updateMap['filePath'] = filePath;
+    return _channel.invokeMethod('updatePdf', updateMap);
   }
 }
